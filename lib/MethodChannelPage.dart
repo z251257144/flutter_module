@@ -13,20 +13,37 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
 
   int _counter = 30;
 
-  var channel = MethodChannel('com.zhou.MethodChannel');
+  // var channel = MethodChannel('com.zhou.MethodChannel');
+  static const MethodChannel channel =
+      const MethodChannel('com.zhou.MethodChannel');
+
+  var _nativeData;
+
+  @override
+  void initState() {
+    super.initState();
+    print("_MethodChannelPageState initState");
+
+    channel.setMethodCallHandler((call) {
+      var callData =
+          "Flutter收到Native发送的数据" + call.method + call.arguments.toString();
+      print(callData);
+      setState(() {
+        _nativeData = call.arguments["count"];
+      });
+      return Future<dynamic>.value();
+    });
+  }
 
   Future<void> _incrementCounter() async {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
 
     var result = await channel
         .invokeMethod('flutterSendData', {'name': 'zhou', 'age': _counter});
+    print("Flutter 收到了返回数据");
+    print(result);
   }
 
   @override
@@ -48,6 +65,8 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
               style: TextStyle(fontSize: 28.0),
             ),
           ),
+          Text("Native发送的数据："),
+          Text('$_nativeData'),
         ],
       ),
     );
